@@ -74,7 +74,7 @@ def get_all_quotes():
 def add_quote():
 
     mydict = {'id': '5a6ce86e2af929789500e7e4', 'quotes': 'Computer Science is no more about computers than astronomy is about telescopes.',
-              'author': 'Linu Jose', 'source': 'nandu', 'rating': 3.5, 'addedBy': '5ab04d928c8b4e3cbf733557'}
+              'author': 'Linu Jose', 'source': 'medium', 'rating': 3.5, 'addedBy': '5ab04d928c8b4e3cbf733557'}
 
     mycol.insert_one(mydict)
 
@@ -101,7 +101,8 @@ def recommended_quotes():
     recm_qute = []
     for m in mycol.find():
         if m['rating'] > 3.0:
-            recm_qute.append({"id": m['_id'], 'quotes': m['quotes']})
+            recm_qute.append(
+                {"id": m['_id'], 'quotes': m['quotes'], 'ratings': m['rating']})
     recommends_col = mydb["recommended-quotes"]
     recommends_col.insert_many(recm_qute)
     recs = {'recommended_quotes': recm_qute}
@@ -110,7 +111,7 @@ def recommended_quotes():
 
 
 @app.route('/similar-quotes')
-def similar_quotes():
+def similar_quote():
     for m in mycol.find():
         if not check_float(str(m['rating'])):
             unrated_quote = m['quotes']
@@ -134,12 +135,24 @@ def similar_quotes():
 @app.route('/update')
 def Rate_or_UpdateQuote():
     myquery = {'id': '5a6ce86e2af929789500e7e4'}
-    mycol.find_one(myquery)
+    old_vals = mycol.find_one(myquery)
     newvalues = {"$set": {"rating": 5.0}}
     mycol.update_one(myquery, newvalues)
     updated_q = {"Old_values":
-                 myquery, "Updated_values": mycol.find_one(myquery)}
+                 old_vals, "Updated_values": mycol.find_one(myquery)}
     dumps = json.dumps(updated_q, default=str)
+    return dumps
+
+
+@app.route('/disliked')
+def Below_Three_or_Disliked():
+    disliked_qute = []
+    for m in mycol.find():
+        if m['rating'] < 3.0:
+            disliked_qute.append(
+                {"id": m['_id'], 'quotes': m['quotes'], 'ratings': m['rating']})
+    dis = {'recommended_quotes': disliked_qute}
+    dumps = json.dumps(dis, default=str)
     return dumps
 
 
