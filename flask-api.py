@@ -5,11 +5,16 @@ from datetime import datetime
 from flask import Flask, render_template, jsonify
 import json
 
+from pandas import *
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")
-
 mydb = myclient["briqb"]
-
 mycol = mydb["quotes"]
+
+xls = ExcelFile('Assignment Dataset .xlsx')
+data = xls.parse(xls.sheet_names[0])
+quotes = []
+quotes.append(data.to_dict('records'))
+mycol.insert_many(data.to_dict('records'))
 
 app = Flask(__name__)
 
