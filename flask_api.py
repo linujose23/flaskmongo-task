@@ -66,13 +66,9 @@ def Rated_quotes():
     all_rated_quotes = {'all_quotes': not_null}
     dumps = json.dumps(all_rated_quotes, default=str)
     return dumps
-    # val = {"data": not_null}
-    # # print(val['data1'])
-    # rsp = {"status": 0, "all-rated-quotes": str(val)}
-    # return jsonify(rsp)
-
 
 # for null rated quotes
+
 
 @app.route('/unrated')
 def unrated_quotes():
@@ -83,7 +79,8 @@ def unrated_quotes():
         if not check_float(str(m['rating'])):
             print(m['quotes'])
             unrated_quote.append(m['quotes'])
-    print('len of unrated quote', len(unrated_quote))
+            unrated_quote = list(set(unrated_quote))
+    # print('len of unrated quote', len(unrated_quote))
     unrated = {'unrated_qoutes': unrated_quote}
     return jsonify(unrated)
 
@@ -141,8 +138,10 @@ def recommended_quotes():
     recm_qute = []
     for m in mycol.find():
         if m['rating'] > 3.0:
+            # recm_qute.append(
+            #     {"id": m['_id'], 'quotes': m['quotes'], 'ratings': m['rating']})
             recm_qute.append(
-                {"id": m['_id'], 'quotes': m['quotes'], 'ratings': m['rating']})
+                {'quotes': m['quotes'], 'ratings': m['rating']})
     recommends_col = mydb["recommended-quotes"]
     recommends_col.insert_many(recm_qute)
     recs = {'recommended_quotes': recm_qute}
