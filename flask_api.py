@@ -138,6 +138,7 @@ def recommended_quotes():
     recm_qute = []
     for m in mycol.find():
         if m['rating'] > 3.0:
+            print('full m', m)
             # recm_qute.append(
             #     {"id": m['_id'], 'quotes': m['quotes'], 'ratings': m['rating']})
             recm_qute.append(
@@ -160,7 +161,7 @@ def similar_quote():
     recm_qute = []
     for m in mycol.find():
         if m['rating'] > 3.0:
-            recm_qute.append({"id": m['_id'], 'quotes': m['quotes']})
+            recm_qute.append({"id": m['id'], 'quotes': m['quotes']})
 
     li_com = []
     for rq in recm_qute:
@@ -172,13 +173,19 @@ def similar_quote():
     return jsonify(similar_quote_found)
 
 
-@ app.route('/update')
+@ app.route('/update', methods=['POST'])
 def Rate_or_UpdateQuote():
     mydb = myclient["briqb"]
     mycol = mydb["quotes"]
-    myquery = {'id': '5a6ce86e2af929789500e7e4'}
+    # myquery = {"id": "5a6ce86e2af929789500e7e4"}
+    myquery = request.form['myquery']
+    myquery = ast.literal_eval(myquery)
     old_vals = mycol.find_one(myquery)
-    newvalues = {"$set": {"rating": 5.0}}
+    newquery = request.form['newquery']
+    newquery = ast.literal_eval(newquery)
+    # newvalues = {"$set": {"rating": 3.7}}
+    newvalues = {"$set": newquery}
+    print('new_values :', newvalues)
     mycol.update_one(myquery, newvalues)
     updated_q = {"Old_values":
                  old_vals, "Updated_values": mycol.find_one(myquery)}
